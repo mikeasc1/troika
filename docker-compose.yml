@@ -1,378 +1,143 @@
 services:
-    db:
-        image: 'postgres:15-alpine'
-        container_name: db-m4ows4c8kssswsssk4ocowco-213055459918
-        ports:
-            - '5432:5432'
-        environment:
-            POSTGRES_USER: '${POSTGRES_USER:-twitteros}'
-            POSTGRES_PASSWORD: '${POSTGRES_PASSWORD:-twitteros}'
-            POSTGRES_DB: '${POSTGRES_DB:-twitteros}'
-            COOLIFY_BRANCH: '"main"'
-            COOLIFY_RESOURCE_UUID: m4ows4c8kssswsssk4ocowco
-            COOLIFY_CONTAINER_NAME: db-m4ows4c8kssswsssk4ocowco-213055459918
-            SERVICE_URL_FRONTEND: 'http://j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io'
-            SERVICE_FQDN_FRONTEND: j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io
-            SERVICE_NAME_DB: db
-            SERVICE_NAME_REDIS: redis
-            SERVICE_NAME_API: api
-            SERVICE_NAME_WORKER: worker
-            SERVICE_NAME_BEAT: beat
-            SERVICE_NAME_FLOWER: flower
-            SERVICE_NAME_FRONTEND: frontend
-        volumes:
-            - 'm4ows4c8kssswsssk4ocowco_postgres-data:/var/lib/postgresql/data'
-        healthcheck:
-            test:
-                - CMD-SHELL
-                - 'pg_isready -U twitteros'
-            interval: 10s
-            timeout: 5s
-            retries: 5
-        restart: unless-stopped
-        labels:
-            - coolify.managed=true
-            - coolify.version=4.0.0-beta.463
-            - coolify.applicationId=1
-            - coolify.type=application
-            - coolify.name=db-m4ows4c8kssswsssk4ocowco-213055459918
-            - coolify.resourceName=twitteros
-            - coolify.projectName=twitteros
-            - coolify.serviceName=twitteros
-            - coolify.environmentName=production
-            - coolify.pullRequestId=0
-        networks:
-            m4ows4c8kssswsssk4ocowco: null
-        env_file:
-            - .env
-    redis:
-        image: 'redis:7-alpine'
-        container_name: redis-m4ows4c8kssswsssk4ocowco-213055467203
-        ports:
-            - '6379:6379'
-        volumes:
-            - 'm4ows4c8kssswsssk4ocowco_redis-data:/data'
-        healthcheck:
-            test:
-                - CMD
-                - redis-cli
-                - ping
-            interval: 10s
-            timeout: 5s
-            retries: 3
-        restart: unless-stopped
-        labels:
-            - coolify.managed=true
-            - coolify.version=4.0.0-beta.463
-            - coolify.applicationId=1
-            - coolify.type=application
-            - coolify.name=redis-m4ows4c8kssswsssk4ocowco-213055467203
-            - coolify.resourceName=twitteros
-            - coolify.projectName=twitteros
-            - coolify.serviceName=twitteros
-            - coolify.environmentName=production
-            - coolify.pullRequestId=0
-        networks:
-            m4ows4c8kssswsssk4ocowco: null
-        environment:
-            COOLIFY_BRANCH: '"main"'
-            COOLIFY_RESOURCE_UUID: m4ows4c8kssswsssk4ocowco
-            COOLIFY_CONTAINER_NAME: redis-m4ows4c8kssswsssk4ocowco-213055467203
-            SERVICE_URL_FRONTEND: 'http://j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io'
-            SERVICE_FQDN_FRONTEND: j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io
-            SERVICE_NAME_DB: db
-            SERVICE_NAME_REDIS: redis
-            SERVICE_NAME_API: api
-            SERVICE_NAME_WORKER: worker
-            SERVICE_NAME_BEAT: beat
-            SERVICE_NAME_FLOWER: flower
-            SERVICE_NAME_FRONTEND: frontend
-        env_file:
-            - .env
-    api:
-        build:
-            context: ./backend
-            target: api
-        container_name: api-m4ows4c8kssswsssk4ocowco-213055473390
-        ports:
-            - '8000:8000'
-        env_file:
-            - .env
-        environment:
-            DATABASE_URL: 'postgresql://twitteros:twitteros@db:5432/twitteros'
-            REDIS_URL: 'redis://redis:6379/0'
-            COOLIFY_BRANCH: '"main"'
-            COOLIFY_RESOURCE_UUID: m4ows4c8kssswsssk4ocowco
-            COOLIFY_CONTAINER_NAME: api-m4ows4c8kssswsssk4ocowco-213055473390
-            SERVICE_URL_FRONTEND: 'http://j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io'
-            SERVICE_FQDN_FRONTEND: j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io
-            SERVICE_NAME_DB: db
-            SERVICE_NAME_REDIS: redis
-            SERVICE_NAME_API: api
-            SERVICE_NAME_WORKER: worker
-            SERVICE_NAME_BEAT: beat
-            SERVICE_NAME_FLOWER: flower
-            SERVICE_NAME_FRONTEND: frontend
-        volumes:
-            - '/data/coolify/applications/m4ows4c8kssswsssk4ocowco/backend:/app'
-            - '/app/.venv:/app/.venv'
-            - '/data/coolify/applications/m4ows4c8kssswsssk4ocowco/backend/data:/app/data'
-        depends_on:
-            db:
-                condition: service_healthy
-            redis:
-                condition: service_healthy
-        healthcheck:
-            test:
-                - CMD
-                - curl
-                - '-f'
-                - 'http://localhost:8000/health'
-            interval: 30s
-            timeout: 10s
-            retries: 3
-        restart: unless-stopped
-        labels:
-            - coolify.managed=true
-            - coolify.version=4.0.0-beta.463
-            - coolify.applicationId=1
-            - coolify.type=application
-            - coolify.name=api-m4ows4c8kssswsssk4ocowco-213055473390
-            - coolify.resourceName=twitteros
-            - coolify.projectName=twitteros
-            - coolify.serviceName=twitteros
-            - coolify.environmentName=production
-            - coolify.pullRequestId=0
-        networks:
-            m4ows4c8kssswsssk4ocowco: null
-        image: 'm4ows4c8kssswsssk4ocowco_api:871143eec70106b6d6a4e219da6cdf16b4622388'
-    worker:
-        build:
-            context: ./backend
-            target: worker
-        container_name: worker-m4ows4c8kssswsssk4ocowco-213055484512
-        env_file:
-            - .env
-        environment:
-            DATABASE_URL: 'postgresql://twitteros:twitteros@db:5432/twitteros'
-            REDIS_URL: 'redis://redis:6379/0'
-            COOLIFY_BRANCH: '"main"'
-            COOLIFY_RESOURCE_UUID: m4ows4c8kssswsssk4ocowco
-            COOLIFY_CONTAINER_NAME: worker-m4ows4c8kssswsssk4ocowco-213055484512
-            SERVICE_URL_FRONTEND: 'http://j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io'
-            SERVICE_FQDN_FRONTEND: j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io
-            SERVICE_NAME_DB: db
-            SERVICE_NAME_REDIS: redis
-            SERVICE_NAME_API: api
-            SERVICE_NAME_WORKER: worker
-            SERVICE_NAME_BEAT: beat
-            SERVICE_NAME_FLOWER: flower
-            SERVICE_NAME_FRONTEND: frontend
-        volumes:
-            - '/data/coolify/applications/m4ows4c8kssswsssk4ocowco/backend:/app'
-            - '/app/.venv:/app/.venv'
-            - '/data/coolify/applications/m4ows4c8kssswsssk4ocowco/backend/data:/app/data'
-        depends_on:
-            db:
-                condition: service_healthy
-            redis:
-                condition: service_healthy
-            api:
-                condition: service_healthy
-        restart: unless-stopped
-        labels:
-            - coolify.managed=true
-            - coolify.version=4.0.0-beta.463
-            - coolify.applicationId=1
-            - coolify.type=application
-            - coolify.name=worker-m4ows4c8kssswsssk4ocowco-213055484512
-            - coolify.resourceName=twitteros
-            - coolify.projectName=twitteros
-            - coolify.serviceName=twitteros
-            - coolify.environmentName=production
-            - coolify.pullRequestId=0
-        networks:
-            m4ows4c8kssswsssk4ocowco: null
-        image: 'm4ows4c8kssswsssk4ocowco_worker:871143eec70106b6d6a4e219da6cdf16b4622388'
-    beat:
-        build:
-            context: ./backend
-            target: beat
-        container_name: beat-m4ows4c8kssswsssk4ocowco-213055494797
-        env_file:
-            - .env
-        environment:
-            DATABASE_URL: 'postgresql://twitteros:twitteros@db:5432/twitteros'
-            REDIS_URL: 'redis://redis:6379/0'
-            COOLIFY_BRANCH: '"main"'
-            COOLIFY_RESOURCE_UUID: m4ows4c8kssswsssk4ocowco
-            COOLIFY_CONTAINER_NAME: beat-m4ows4c8kssswsssk4ocowco-213055494797
-            SERVICE_URL_FRONTEND: 'http://j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io'
-            SERVICE_FQDN_FRONTEND: j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io
-            SERVICE_NAME_DB: db
-            SERVICE_NAME_REDIS: redis
-            SERVICE_NAME_API: api
-            SERVICE_NAME_WORKER: worker
-            SERVICE_NAME_BEAT: beat
-            SERVICE_NAME_FLOWER: flower
-            SERVICE_NAME_FRONTEND: frontend
-        volumes:
-            - '/data/coolify/applications/m4ows4c8kssswsssk4ocowco/backend:/app'
-            - '/app/.venv:/app/.venv'
-            - '/data/coolify/applications/m4ows4c8kssswsssk4ocowco/backend/data:/app/data'
-        depends_on:
-            db:
-                condition: service_healthy
-            redis:
-                condition: service_healthy
-            api:
-                condition: service_healthy
-        restart: unless-stopped
-        labels:
-            - coolify.managed=true
-            - coolify.version=4.0.0-beta.463
-            - coolify.applicationId=1
-            - coolify.type=application
-            - coolify.name=beat-m4ows4c8kssswsssk4ocowco-213055494797
-            - coolify.resourceName=twitteros
-            - coolify.projectName=twitteros
-            - coolify.serviceName=twitteros
-            - coolify.environmentName=production
-            - coolify.pullRequestId=0
-        networks:
-            m4ows4c8kssswsssk4ocowco: null
-        image: 'm4ows4c8kssswsssk4ocowco_beat:871143eec70106b6d6a4e219da6cdf16b4622388'
-    flower:
-        image: 'mher/flower:latest'
-        container_name: flower-m4ows4c8kssswsssk4ocowco-213055508280
-        environment:
-            CELERY_BROKER_URL: 'redis://redis:6379/0'
-            FLOWER_PORT: '5555'
-            COOLIFY_BRANCH: '"main"'
-            COOLIFY_RESOURCE_UUID: m4ows4c8kssswsssk4ocowco
-            COOLIFY_CONTAINER_NAME: flower-m4ows4c8kssswsssk4ocowco-213055508280
-            SERVICE_URL_FRONTEND: 'http://j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io'
-            SERVICE_FQDN_FRONTEND: j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io
-            SERVICE_NAME_DB: db
-            SERVICE_NAME_REDIS: redis
-            SERVICE_NAME_API: api
-            SERVICE_NAME_WORKER: worker
-            SERVICE_NAME_BEAT: beat
-            SERVICE_NAME_FLOWER: flower
-            SERVICE_NAME_FRONTEND: frontend
-        ports:
-            - '5555:5555'
-        depends_on:
-            - redis
-            - api
-            - worker
-        restart: unless-stopped
-        labels:
-            - coolify.managed=true
-            - coolify.version=4.0.0-beta.463
-            - coolify.applicationId=1
-            - coolify.type=application
-            - coolify.name=flower-m4ows4c8kssswsssk4ocowco-213055508280
-            - coolify.resourceName=twitteros
-            - coolify.projectName=twitteros
-            - coolify.serviceName=twitteros
-            - coolify.environmentName=production
-            - coolify.pullRequestId=0
-        networks:
-            m4ows4c8kssswsssk4ocowco: null
-        env_file:
-            - .env
-    frontend:
-        build:
-            context: ./frontend
-            args:
-                - 'NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}'
-        container_name: frontend-m4ows4c8kssswsssk4ocowco-213055510955
-        ports:
-            - '3000:3000'
-        env_file:
-            - .env
-        depends_on:
-            api:
-                condition: service_healthy
-        restart: unless-stopped
-        labels:
-            - coolify.managed=true
-            - coolify.version=4.0.0-beta.463
-            - coolify.applicationId=1
-            - coolify.type=application
-            - coolify.name=frontend-m4ows4c8kssswsssk4ocowco-213055510955
-            - coolify.resourceName=twitteros
-            - coolify.projectName=twitteros
-            - coolify.serviceName=twitteros
-            - coolify.environmentName=production
-            - coolify.pullRequestId=0
-            - traefik.enable=true
-            - traefik.http.middlewares.gzip.compress=true
-            - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
-            - traefik.http.routers.http-0-m4ows4c8kssswsssk4ocowco-frontend.entryPoints=http
-            - traefik.http.routers.http-0-m4ows4c8kssswsssk4ocowco-frontend.middlewares=gzip
-            - 'traefik.http.routers.http-0-m4ows4c8kssswsssk4ocowco-frontend.rule=Host(`j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io`) && PathPrefix(`/`)'
-            - traefik.http.routers.http-1-m4ows4c8kssswsssk4ocowco-frontend.entryPoints=http
-            - traefik.http.routers.http-1-m4ows4c8kssswsssk4ocowco-frontend.middlewares=redirect-to-https
-            - 'traefik.http.routers.http-1-m4ows4c8kssswsssk4ocowco-frontend.rule=Host(`troikacompanies.com`) && PathPrefix(`/`)'
-            - traefik.http.routers.http-2-m4ows4c8kssswsssk4ocowco-frontend.entryPoints=http
-            - traefik.http.routers.http-2-m4ows4c8kssswsssk4ocowco-frontend.middlewares=redirect-to-https
-            - 'traefik.http.routers.http-2-m4ows4c8kssswsssk4ocowco-frontend.rule=Host(`www.troikacompanies.com`) && PathPrefix(`/`)'
-            - traefik.http.routers.https-1-m4ows4c8kssswsssk4ocowco-frontend.entryPoints=https
-            - traefik.http.routers.https-1-m4ows4c8kssswsssk4ocowco-frontend.middlewares=gzip
-            - 'traefik.http.routers.https-1-m4ows4c8kssswsssk4ocowco-frontend.rule=Host(`troikacompanies.com`) && PathPrefix(`/`)'
-            - traefik.http.routers.https-1-m4ows4c8kssswsssk4ocowco-frontend.tls.certresolver=letsencrypt
-            - traefik.http.routers.https-1-m4ows4c8kssswsssk4ocowco-frontend.tls=true
-            - traefik.http.routers.https-2-m4ows4c8kssswsssk4ocowco-frontend.entryPoints=https
-            - traefik.http.routers.https-2-m4ows4c8kssswsssk4ocowco-frontend.middlewares=gzip
-            - 'traefik.http.routers.https-2-m4ows4c8kssswsssk4ocowco-frontend.rule=Host(`www.troikacompanies.com`) && PathPrefix(`/`)'
-            - traefik.http.routers.https-2-m4ows4c8kssswsssk4ocowco-frontend.tls.certresolver=letsencrypt
-            - traefik.http.routers.https-2-m4ows4c8kssswsssk4ocowco-frontend.tls=true
-            - 'caddy_0.encode=zstd gzip'
-            - 'caddy_0.handle_path.0_reverse_proxy={{upstreams}}'
-            - 'caddy_0.handle_path=/*'
-            - caddy_0.header=-Server
-            - 'caddy_0.try_files={path} /index.html /index.php'
-            - 'caddy_0=http://j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io'
-            - 'caddy_1.encode=zstd gzip'
-            - 'caddy_1.handle_path.1_reverse_proxy={{upstreams}}'
-            - 'caddy_1.handle_path=/*'
-            - caddy_1.header=-Server
-            - 'caddy_1.try_files={path} /index.html /index.php'
-            - 'caddy_1=https://troikacompanies.com'
-            - 'caddy_2.encode=zstd gzip'
-            - 'caddy_2.handle_path.2_reverse_proxy={{upstreams}}'
-            - 'caddy_2.handle_path=/*'
-            - caddy_2.header=-Server
-            - 'caddy_2.try_files={path} /index.html /index.php'
-            - 'caddy_2=https://www.troikacompanies.com'
-            - caddy_ingress_network=m4ows4c8kssswsssk4ocowco
-        networks:
-            m4ows4c8kssswsssk4ocowco: null
-        environment:
-            NEXT_PUBLIC_API_URL: '${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}'
-            COOLIFY_BRANCH: '"main"'
-            COOLIFY_RESOURCE_UUID: m4ows4c8kssswsssk4ocowco
-            COOLIFY_CONTAINER_NAME: frontend-m4ows4c8kssswsssk4ocowco-213055510955
-            SERVICE_URL_FRONTEND: 'http://j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io'
-            SERVICE_FQDN_FRONTEND: j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io
-            COOLIFY_URL: 'http://j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io,https://troikacompanies.com,https://www.troikacompanies.com'
-            COOLIFY_FQDN: 'j88wccok0k8skssc8s0444wc.145.79.7.199.sslip.io,troikacompanies.com,www.troikacompanies.com'
-            SERVICE_NAME_DB: db
-            SERVICE_NAME_REDIS: redis
-            SERVICE_NAME_API: api
-            SERVICE_NAME_WORKER: worker
-            SERVICE_NAME_BEAT: beat
-            SERVICE_NAME_FLOWER: flower
-            SERVICE_NAME_FRONTEND: frontend
-        image: 'm4ows4c8kssswsssk4ocowco_frontend:871143eec70106b6d6a4e219da6cdf16b4622388'
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-twitteros}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-twitteros}
+      POSTGRES_DB: ${POSTGRES_DB:-twitteros}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-twitteros}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - appnet
+    env_file:
+      - .env
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - appnet
+    env_file:
+      - .env
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: api
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://twitteros:twitteros@db:5432/twitteros}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - appnet
+    env_file:
+      - .env
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: worker
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://twitteros:twitteros@db:5432/twitteros}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - appnet
+    env_file:
+      - .env
+
+  beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: beat
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://twitteros:twitteros@db:5432/twitteros}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - appnet
+    env_file:
+      - .env
+
+  flower:
+    image: mher/flower:latest
+    environment:
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+      FLOWER_PORT: ${FLOWER_PORT:-5555}
+    depends_on:
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+      worker:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - appnet
+    env_file:
+      - .env
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - appnet
+    env_file:
+      - .env
+
 volumes:
-    m4ows4c8kssswsssk4ocowco_postgres-data:
-        name: m4ows4c8kssswsssk4ocowco_postgres-data
-    m4ows4c8kssswsssk4ocowco_redis-data:
-        name: m4ows4c8kssswsssk4ocowco_redis-data
+  postgres-data:
+  redis-data:
+
 networks:
-    m4ows4c8kssswsssk4ocowco:
-        name: m4ows4c8kssswsssk4ocowco
-        external: true
+  appnet:
+    external: true
+    name: m4ows4c8kssswsssk4ocowco
