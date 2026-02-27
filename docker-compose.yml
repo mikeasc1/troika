@@ -38,6 +38,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: api
+    ports:
+      - "8000:8000"
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql://twitteros:twitteros@db:5432/twitteros}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
@@ -101,6 +103,8 @@ services:
 
   flower:
     image: mher/flower:latest
+    ports:
+      - "5555:5555"
     environment:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
       FLOWER_PORT: ${FLOWER_PORT:-5555}
@@ -122,6 +126,8 @@ services:
       context: ./frontend
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
+    ports:
+      - "3000:3000"
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
     depends_on:
@@ -139,5 +145,4 @@ volumes:
 
 networks:
   appnet:
-    external: true
-    name: m4ows4c8kssswsssk4ocowco
+    driver: bridge
