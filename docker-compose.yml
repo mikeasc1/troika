@@ -38,8 +38,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: api
-    ports:
-      - "8000:8000"
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql://twitteros:twitteros@db:5432/twitteros}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
