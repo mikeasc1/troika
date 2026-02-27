@@ -1,0 +1,48 @@
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Local data
+*.db
+data/
+
+# Environment files (keep .env.example)
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+celerybeat-schedule
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Documentation
+docs/
+*.md
+!README.md

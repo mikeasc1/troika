@@ -1,0 +1,80 @@
+# docker-compose.yml - TwitterOS Backend Services
+# For local development with Podman: podman-compose up
+# For production with Docker: docker compose up -d
+
+services:
+  # Redis for Celery broker
+  redis:
+    image: redis:7-alpine
+    container_name: twitteros-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # FastAPI Application
+  api:
+    build:
+      context: .
+      target: api
+    container_name: twitteros-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./data/twitteros.db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+    volumes:
+      - ./data:/app/data  # Persist SQLite database
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Celery Worker
+  worker:
+    build:
+      context: .
+      target: worker
+    container_name: twitteros-worker
+    environment:
+      - DATABASE_URL=sqlite:///./data/twitteros.db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+
+  # Celery Beat Scheduler
+  beat:
+    build:
+      context: .
+      target: beat
+    container_name: twitteros-beat
+    environment:
+      - DATABASE_URL=sqlite:///./data/twitteros.db
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+
+volumes:
+  redis_data:

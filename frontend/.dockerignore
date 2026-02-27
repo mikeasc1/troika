@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Environment (keep example)
+.env
+.env.local
+.env.production
+
+# Misc
+*.md
+!README.md
+*.log
