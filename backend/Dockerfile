@@ -25,6 +25,7 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv
@@ -52,20 +53,26 @@ RUN groupadd --gid 1000 appuser && \
 USER appuser
 
 # Copy dependency files
-COPY --chown=appuser:appuser pyproject.toml uv.lock ./
+COPY --chown=appuser:appuser pyproject.toml uv.lock /app/
 
 # Install dependencies
-# (Cache mount removed to avoid permission issues)
 RUN uv sync --frozen --no-install-project --no-dev
 
 # Copy application code
-COPY --chown=appuser:appuser . .
+COPY --chown=appuser:appuser . /app/
 
 # Set path to use virtual environment
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Make scripts executable
-RUN chmod +x start.sh entrypoint.sh
+# ---- HARDEN SCRIPT HANDLING ----
+# 1) Fail early if scripts are missing
+# 2) Normalize CRLF -> LF (Windows-safe)
+# 3) Make executable
+RUN test -f /app/start.sh || (echo "ERROR: Missing /app/start.sh in image" && exit 1) && \
+    test -f /app/entrypoint.sh || (echo "ERROR: Missing /app/entrypoint.sh in image" && exit 1) && \
+    sed -i 's/\r$//' /app/start.sh /app/entrypoint.sh && \
+    chmod +x /app/start.sh /app/entrypoint.sh
+# --------------------------------
 
 # Expose port
 EXPOSE 8000
@@ -74,7 +81,7 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Default command
+# Default command (used by production stage if you ever run it directly)
 CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # ================================
@@ -89,7 +96,7 @@ ARG POSTGRES_DB
 ARG NEXT_PUBLIC_API_URL
 ARG SERVICE_URL_FRONTEND
 ARG SERVICE_FQDN_FRONTEND
-CMD ["./start.sh", "worker"]
+CMD ["/app/start.sh", "worker"]
 
 # ================================
 # Beat stage (Celery beat only)
@@ -103,7 +110,7 @@ ARG POSTGRES_DB
 ARG NEXT_PUBLIC_API_URL
 ARG SERVICE_URL_FRONTEND
 ARG SERVICE_FQDN_FRONTEND
-CMD ["./start.sh", "beat"]
+CMD ["/app/start.sh", "beat"]
 
 # ================================
 # API stage (FastAPI only)
@@ -117,4 +124,4 @@ ARG POSTGRES_DB
 ARG NEXT_PUBLIC_API_URL
 ARG SERVICE_URL_FRONTEND
 ARG SERVICE_FQDN_FRONTEND
-CMD ["./entrypoint.sh"]
+CMD ["/app/entrypoint.sh"]
