@@ -122,8 +122,9 @@ services:
   frontend:
     labels:
     - traefik.enable=true
-    - traefik.http.routers.frontend.rule=Host(`twitteros.troikacompanies.com`)
+    - traefik.http.routers.frontend.rule=Host(`troikacompanies.com',`www.troikacompanies.com`)
     - traefik.http.routers.frontend.entrypoints=web
+    - traefik.http.services.frontend.loadbalancer.server.port=3000
     build:
       context: ./frontend
       args:
