@@ -120,6 +120,10 @@ services:
       - .env
 
   frontend:
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.frontend.rule=Host(`twitteros.troikacompanies.com`)
+    - traefik.http.routers.frontend.entrypoints=http
     build:
       context: ./frontend
       args:
