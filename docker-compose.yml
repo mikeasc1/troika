@@ -123,7 +123,7 @@ services:
     labels:
     - traefik.enable=true
     - traefik.http.routers.frontend.rule=Host(`twitteros.troikacompanies.com`)
-    - traefik.http.routers.frontend.entrypoints=http
+    - traefik.http.routers.frontend.entrypoints=web
     build:
       context: ./frontend
       args:
