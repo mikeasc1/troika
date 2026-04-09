@@ -127,10 +127,13 @@ services:
     - traefik.http.services.frontend.loadbalancer.server.port=3000
     build:
       context: ./frontend
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10  
       args:
         NEXT_PUBLIC_API_URL: http://145.79.7.199:8000/api/v1
-    ports:
-      - "3000:3000"
     environment:
       NEXT_PUBLIC_API_URL: http://145.79.7.199:8000/api/v1
     depends_on:
