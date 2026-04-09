@@ -99,27 +99,7 @@ services:
     env_file:
       - .env
 
-  flower:
-    image: mher/flower:latest
-    ports:
-      - "5555:5555"
-    environment:
-      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
-      FLOWER_PORT: ${FLOWER_PORT:-5555}
-    depends_on:
-      redis:
-        condition: service_healthy
-      api:
-        condition: service_healthy
-      worker:
-        condition: service_started
-    restart: unless-stopped
-    networks:
-      - appnet
-    env_file:
-      - .env
-
- frontend:
+  frontend:
   labels:
     - traefik.enable=true
     - traefik.http.routers.frontend.rule=Host(`troikacompanies.com`,`www.troikacompanies.com`)
@@ -151,7 +131,6 @@ services:
 
   env_file:
     - .env
-
 volumes:
   postgres-data:
   redis-data:
