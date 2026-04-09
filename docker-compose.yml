@@ -119,34 +119,38 @@ services:
     env_file:
       - .env
 
-  frontend:
-    labels:
+ frontend:
+  labels:
     - traefik.enable=true
-    - traefik.http.routers.frontend.rule=Host(`troikacompanies.com',`www.troikacompanies.com`)
+    - traefik.http.routers.frontend.rule=Host(`troikacompanies.com`,`www.troikacompanies.com`)
     - traefik.http.routers.frontend.entrypoints=web
     - traefik.http.services.frontend.loadbalancer.server.port=3000
-    build:
-      context: ./frontend
-       args:
-         - NEXT_PUBLIC_API_URL=http://145.79.7.199:8000/api/v1
-          
-    healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ >/dev/null 2>&1 || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10  
-      
-   environment:
-    - NEXT_PUBLIC_API_URL=http://145.79.7.199:8000/api/v1
-     
-    depends_on:
-      api:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - appnet
-    env_file:
-      - .env
+
+  build:
+    context: ./frontend
+    args:
+      NEXT_PUBLIC_API_URL: "http://145.79.7.199:8000/api/v1"
+
+  healthcheck:
+    test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/ >/dev/null 2>&1 || exit 1"]
+    interval: 10s
+    timeout: 5s
+    retries: 10
+
+  environment:
+    NEXT_PUBLIC_API_URL: "http://145.79.7.199:8000/api/v1"
+
+  depends_on:
+    api:
+      condition: service_healthy
+
+  restart: unless-stopped
+
+  networks:
+    - appnet
+
+  env_file:
+    - .env
 
 volumes:
   postgres-data:
