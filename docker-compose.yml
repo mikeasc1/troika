@@ -132,7 +132,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10  
-      args:
+    args:
         NEXT_PUBLIC_API_URL: http://145.79.7.199:8000/api/v1
     environment:
       NEXT_PUBLIC_API_URL: http://145.79.7.199:8000/api/v1
